@@ -24,14 +24,23 @@ export const esPrestamoIndefinido = (prestamo: Prestamo): boolean => {
  */
 export const calcularProximaFechaQuincenal = (desdeFecha: Date): Date => {
   const fecha = new Date(desdeFecha);
+  const anio = fecha.getFullYear();
+  const mes = fecha.getMonth();
+
   if (fecha.getDate() < 15) {
-    fecha.setDate(15);
+    // Next payment is the 15th of this month.
+    return new Date(anio, mes, 15);
   } else {
-    const anio = fecha.getFullYear();
-    const mes = fecha.getMonth();
-    return new Date(anio, mes + 1, 0); // Último día del mes actual
+    // Candidate for next payment is end of current month.
+    const finDeMes = new Date(anio, mes + 1, 0);
+    if (fecha.getDate() >= finDeMes.getDate()) {
+      // If we are on or after the last day of the month, next payment is 15th of next month.
+      return new Date(anio, mes + 1, 15);
+    } else {
+      // Otherwise, it's the end of this month.
+      return finDeMes;
+    }
   }
-  return fecha;
 };
 
 /**

@@ -1,6 +1,6 @@
 // src/tests/prestamos.test.ts
 
-import { calcularInteresesPrestamoIndefinido } from '../types/prestamos';
+import { calcularInteresesPrestamoIndefinido, calcularProximaFechaQuincenal } from '../types/prestamos';
 // Mock de convertirFecha para que las pruebas sean predecibles
 jest.mock('@/lib/utils', () => ({
   ...jest.requireActual('@/lib/utils'),
@@ -64,4 +64,31 @@ describe('calcularInteresesPrestamoIndefinido', () => {
     expect(resultado.interesesAtrasados).toBeCloseTo(interesesEsperadosCorrectos);
   });
 
+});
+
+describe('calcularProximaFechaQuincenal', () => {
+  it('debe devolver el 15 del mes siguiente si la fecha es el último día del mes', () => {
+    const fecha = new Date('2024-01-31T10:00:00Z');
+    const proximaFecha = calcularProximaFechaQuincenal(fecha);
+    expect(proximaFecha.getFullYear()).toBe(2024);
+    expect(proximaFecha.getMonth()).toBe(1); // Febrero
+    expect(proximaFecha.getDate()).toBe(15);
+  });
+
+  it('debe devolver el último día del mes si la fecha está en la primera quincena', () => {
+    const fecha = new Date('2024-03-16T10:00:00Z');
+    const proximaFecha = calcularProximaFechaQuincenal(fecha);
+    const ultimoDiaMarzo = new Date(2024, 3, 0); // Último día de Marzo
+    expect(proximaFecha.getFullYear()).toBe(ultimoDiaMarzo.getFullYear());
+    expect(proximaFecha.getMonth()).toBe(ultimoDiaMarzo.getMonth());
+    expect(proximaFecha.getDate()).toBe(ultimoDiaMarzo.getDate());
+  });
+
+  it('debe devolver el 15 del mes si la fecha es antes del 15', () => {
+    const fecha = new Date('2024-04-05T10:00:00Z');
+    const proximaFecha = calcularProximaFechaQuincenal(fecha);
+    expect(proximaFecha.getFullYear()).toBe(2024);
+    expect(proximaFecha.getMonth()).toBe(3); // Abril
+    expect(proximaFecha.getDate()).toBe(15);
+  });
 });
