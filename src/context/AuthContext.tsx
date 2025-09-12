@@ -294,27 +294,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Funciones de autenticación
   const signIn = async (email: string, password: string): Promise<void> => {
-    await signInWithEmailAndPassword(auth, email, password);
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged se encargará de setLoading(false) al final
+    } catch (error) {
+      setLoading(false);
+      console.error("Error en signIn:", error);
+      throw error;
+    }
   };
 
-  const signUp = async (email: string, password: string, nombre: string) => {
-    const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
+  const signUp = async (email: string, password:string, nombre: string) => {
+    setLoading(true);
+    try {
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
     
-    await updateProfile(firebaseUser, {
-      displayName: nombre
-    });
+      await updateProfile(firebaseUser, {
+        displayName: nombre
+      });
 
-    await sendEmailVerification(firebaseUser);
+      // La creación del usuario en Firestore se maneja en onAuthStateChanged
+      // para centralizar la lógica. onAuthStateChanged también se encarga de setLoading(false)
+
+      await sendEmailVerification(firebaseUser);
     
-    toast({
-      title: "Cuenta creada",
-      description: "Te hemos enviado un email de verificación",
-    });
+      toast({
+        title: "Cuenta creada",
+        description: "Te hemos enviado un email de verificación.",
+      });
+
+    } catch (error) {
+      setLoading(false);
+      console.error("Error en signUp:", error);
+      throw error;
+    }
   };
 
   const signInWithGoogle = async () => {
+    setLoading(true);
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged se encargará de setLoading(false)
+    } catch (error) {
+      setLoading(false);
+      console.error("Error en signInWithGoogle:", error);
+      throw error;
+    }
   };
 
   const logout = async () => {
